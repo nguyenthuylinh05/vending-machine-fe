@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Nội dung chính</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      padding: 20px;
+    }
+
+    /* Tiêu đề */
+    .page-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    /* Thống kê nhanh */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .card p {
+      font-size: 22px;
+      font-weight: bold;
+      color: #d81b60;
+    }
+
+    /* Bảng dữ liệu */
+    .table-container {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    table th {
+      background: #f0f0f0;
+      font-weight: bold;
+    }
+
+    table tr:hover {
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-title">📊 Trang chủ quản lý</div>
+
+  <!-- Các thẻ thống kê -->
+  <div class="stats">
+    <div class="card">
+      <h3>Máy bán nước</h3>
+      <p>12</p>
+    </div>
+    <div class="card">
+      <h3>Doanh thu hôm nay</h3>
+      <p>5.200.000₫</p>
+    </div>
+    <div class="card">
+      <h3>Báo cáo chờ xử lý</h3>
+      <p>3</p>
+    </div>
+    <div class="card">
+      <h3>Cảnh báo</h3>
+      <p>2</p>
+    </div>
+  </div>
+
+  <!-- Bảng dữ liệu -->
+  <div class="table-container">
+    <h3>Danh sách máy bán nước</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Vị trí</th>
+          <th>Trạng thái</th>
+          <th>Doanh thu</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>M001</td>
+          <td>Trường A</td>
+          <td>Hoạt động</td>
+          <td>1.200.000₫</td>
+        </tr>
+        <tr>
+          <td>M002</td>
+          <td>Bệnh viện B</td>
+          <td>Bảo trì</td>
+          <td>300.000₫</td>
+        </tr>
+        <tr>
+          <td>M003</td>
+          <td>Siêu thị C</td>
+          <td>Hoạt động</td>
+          <td>2.000.000₫</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

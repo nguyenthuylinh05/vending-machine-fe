@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý máy bán nước tự động</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      overflow-y: scroll; /* 👈 luôn có thanh cuộn dọc */
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    td {
+      border: 1px solid #ccc;
+      vertical-align: top;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Kích thước từng vùng */
+    .header { height: 100px; }
+    .footer { height: 60px; }
+    .menu { width: 20%; height: 600px; }
+    .content { width: 60%; height: 600px; }
+    .right { width: 20%; height: 600px; }
+  </style>
+</head>
+<body>
+  <table>
+    <!-- Header -->
+    <tr>
+      <td colspan="3" class="header">
+        <iframe src="T1.html"></iframe>
+      </td>
+    </tr>
+
+    <!-- Menu - Content - Right -->
+    <tr>
+      <td class="menu"><iframe src="T2.html"></iframe></td>
+      <!-- 👇 Khi đăng nhập xong sẽ load home.html -->
+      <td class="content"><iframe src="home.html" name="mainFrame"></iframe></td>
+      <td class="right"><iframe src="T4.html"></iframe></td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+      <td colspan="3" class="footer">
+        <iframe src="T5.html"></iframe>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
