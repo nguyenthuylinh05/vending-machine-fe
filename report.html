@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Báo cáo doanh thu | Vending</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <!-- Chart.js UMD (khuyến nghị khi dùng script tag thuần) -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      :root {
+        --pad: 16px;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        margin: 0;
+        color: #111;
+        background: #fafafa;
+      }
+      header {
+        padding: var(--pad);
+        background: white;
+        border-bottom: 1px solid #eee;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+      main {
+        padding: var(--pad);
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .filters {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin: 12px 0 24px;
+      }
+      .card {
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+      .card h2 {
+        font-size: 16px;
+        margin: 0 0 8px;
+      }
+      .chart-wrap {
+        height: 340px;
+      }
+      .totals {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin: 8px 0 24px;
+      }
+      .pill {
+        background: #f3f4f6;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 13px;
+      }
+      label {
+        font-size: 13px;
+        color: #374151;
+        display: block;
+        margin-bottom: 4px;
+      }
+      input[type="date"],
+      input[type="month"] {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        outline: none;
+      }
+      input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Báo cáo doanh thu theo sản phẩm</h1>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="filters">
+          <div>
+            <label for="filterDay">Chọn ngày</label>
+            <input id="filterDay" type="date" />
+          </div>
+          <div>
+            <label for="filterMonth">Chọn tháng</label>
+            <input id="filterMonth" type="month" />
+          </div>
+        </div>
+        <div class="totals" id="totals"></div>
+      </section>
+
+      <section class="card">
+        <h2>Doanh thu theo ngày</h2>
+        <div class="chart-wrap"><canvas id="chartDay"></canvas></div>
+      </section>
+
+      <section class="card">
+        <h2>Doanh thu theo tháng</h2>
+        <div class="chart-wrap"><canvas id="chartMonth"></canvas></div>
+      </section>
+
+      <section class="card">
+        <h2>Doanh thu từ trước tới nay</h2>
+        <div class="chart-wrap"><canvas id="chartAll"></canvas></div>
+      </section>
+    </main>
+
+    <script type="module">
+      import {
+        getTransactions,
+        buildProductNameMap,
+      } from "./js/transactions.js";
+      import {
+        toLocalYMD,
+        toLocalYM,
+        filterByDay,
+        filterByMonth,
+        revenueByProduct,
+        vnd,
+      } from "./js/stats.js";
+      import { renderRevenueBarChart } from "./js/charts.js";
+
+      const $ = (s) => document.querySelector(s);
+      const elDay = $("#filterDay");
+      const elMonth = $("#filterMonth");
+      const elTotals = $("#totals");
+
+      let cache = null;
+
+      async function ensureData() {
+        if (cache) return cache;
+        const transactions = await getTransactions();
+        const productNameMap = await buildProductNameMap(transactions);
+        cache = { transactions, productNameMap };
+        return cache;
+      }
+
+      function renderTotals({ transactions }) {
+        const totalAll = transactions.reduce(
+          (s, t) => s + Number(t.total_price || 0),
+          0
+        );
+        const today = toLocalYMD(new Date());
+        const thisMonth = toLocalYM(new Date());
+        const totalDay = filterByDay(transactions, today).reduce(
+          (s, t) => s + Number(t.total_price || 0),
+          0
+        );
+        const totalMonth = filterByMonth(transactions, thisMonth).reduce(
+          (s, t) => s + Number(t.total_price || 0),
+          0
+        );
+
+        elTotals.innerHTML = `
+        <span class="pill">Hôm nay: <strong>${vnd(totalDay)}</strong></span>
+        <span class="pill">Tháng này: <strong>${vnd(totalMonth)}</strong></span>
+        <span class="pill">Tất cả: <strong>${vnd(totalAll)}</strong></span>
+      `;
+      }
+
+      async function initialRender() {
+        const { transactions, productNameMap } = await ensureData();
+        renderTotals({ transactions });
+
+        const now = new Date();
+        const ymd = toLocalYMD(now);
+        const ym = toLocalYM(now);
+
+        // set default filter UI
+        elDay.value = ymd;
+        elMonth.value = ym;
+
+        // build datasets
+        const dayData = revenueByProduct(
+          filterByDay(transactions, ymd),
+          productNameMap
+        );
+        const monthData = revenueByProduct(
+          filterByMonth(transactions, ym),
+          productNameMap
+        );
+        const allData = revenueByProduct(transactions, productNameMap);
+
+        renderRevenueBarChart(
+          document.getElementById("chartDay"),
+          dayData,
+          `Doanh thu theo sản phẩm - Ngày ${ymd}`
+        );
+        renderRevenueBarChart(
+          document.getElementById("chartMonth"),
+          monthData,
+          `Doanh thu theo sản phẩm - Tháng ${ym}`
+        );
+        renderRevenueBarChart(
+          document.getElementById("chartAll"),
+          allData,
+          "Doanh thu theo sản phẩm - Từ trước tới nay"
+        );
+      }
+
+      // Handlers cho filter
+      elDay.addEventListener("change", async () => {
+        const { transactions, productNameMap } = await ensureData();
+        const ymd = elDay.value;
+        const dayData = revenueByProduct(
+          filterByDay(transactions, ymd),
+          productNameMap
+        );
+        renderRevenueBarChart(
+          document.getElementById("chartDay"),
+          dayData,
+          `Doanh thu theo sản phẩm - Ngày ${ymd}`
+        );
+      });
+
+      elMonth.addEventListener("change", async () => {
+        const { transactions, productNameMap } = await ensureData();
+        const ym = elMonth.value;
+        const monthData = revenueByProduct(
+          filterByMonth(transactions, ym),
+          productNameMap
+        );
+        renderRevenueBarChart(
+          document.getElementById("chartMonth"),
+          monthData,
+          `Doanh thu theo sản phẩm - Tháng ${ym}`
+        );
+      });
+
+      initialRender().catch((err) => {
+        console.error(err);
+        alert("Không thể tải báo cáo: " + err.message);
+      });
+    </script>
+  </body>
+</html>
