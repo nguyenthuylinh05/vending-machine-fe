@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tài khoản - AutoDrink</title>
+  <style>
+    /* html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    } */
+    body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f7f9fc;
+  margin: 0;
+  /* padding: 40px 20px; */
+  /* overflow: visible; */
+  /* height: auto; */
+    }
+
+    h2 {
+      text-align: center;
+      color: #dd2476;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 30px;
+    }
+
+    .account-box {
+      background: white;
+      max-width: 600px;
+      margin: 0 auto;
+      border-radius: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-top: 10px solid #dd2476;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #444;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      transition: 0.3s;
+      background: #fafafa;
+    }
+
+    input:focus, select:focus {
+      border-color: #dd2476;
+      background: #fff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(221,36,118,0.3);
+    }
+
+    .buttons {
+      text-align: center;
+      margin-top: 25px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin: 0 8px;
+    }
+
+    .btn-save {
+      background: linear-gradient(90deg, #ff512f, #dd2476);
+    }
+    .btn-save:hover { opacity: 0.85; }
+
+    .btn-cancel {
+      background: #777;
+    }
+    .btn-cancel:hover { background: #555; }
+
+    .btn-password {
+      background: linear-gradient(90deg, #dd2476, #ff512f);
+      margin-top: 15px;
+    }
+    .btn-password:hover { opacity: 0.85; }
+
+    .status {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 15px;
+      display: none;
+    }
+
+    /* 🔐 Modal đổi mật khẩu */
+    .modal {
+      display: none;
+      position: absolute;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content h3 {
+      margin-bottom: 15px;
+      color: #dd2476;
+    }
+
+    .modal-content input {
+      width: 90%;
+      margin-bottom: 12px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+
+    .modal-buttons button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      color: white;
+      transition: 0.3s;
+    }
+
+    .confirm-btn {
+      background: #28a745;
+    }
+    .confirm-btn:hover { background: #218838; }
+
+    .cancel-btn {
+      background: #dc3545;
+    }
+    .cancel-btn:hover { background: #a71d2a; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <h2>👤 Thông tin tài khoản</h2>
+
+  <div class="account-box">
+    <div class="form-group">
+      <label for="username">Tên đăng nhập</label>
+      <input type="text" id="username" value="admin_auto">
+    </div>
+
+    <div class="form-group">
+      <label for="fullname">Họ và tên</label>
+      <input type="text" id="fullname" value="Nguyễn Văn A">
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" value="vana@autodrink.vn">
+    </div>
+
+    <!-- 🛡️ Câu hỏi & trả lời bảo mật -->
+    <div class="form-group">
+      <label for="securityQuestion">Câu hỏi bảo mật</label>
+      <select id="securityQuestion">
+        <option value="pet">Tên thú cưng đầu tiên của bạn?</option>
+        <option value="school">Tên trường tiểu học của bạn?</option>
+        <option value="city">Thành phố bạn sinh ra?</option>
+        <option value="food">Món ăn yêu thích của bạn?</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="securityAnswer">Câu trả lời bảo mật</label>
+      <input type="text" id="securityAnswer" value="Bí mật 😎">
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-save" onclick="saveInfo()">💾 Lưu thay đổi</button>
+      <button class="btn btn-cancel" onclick="resetInfo()">↩ Hoàn tác</button>
+      <br>
+      <button class="btn btn-password" onclick="openModal()">🔐 Đổi mật khẩu</button>
+    </div>
+
+    <p class="status" id="statusMsg"></p>
+  </div>
+
+  <!-- 🔐 Modal đổi mật khẩu -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content">
+      <h3>Đổi mật khẩu</h3>
+      <input type="password" id="oldPass" placeholder="Mật khẩu cũ">
+      <input type="password" id="newPass" placeholder="Mật khẩu mới">
+      <input type="password" id="confirmPass" placeholder="Xác nhận mật khẩu mới">
+
+      <div class="modal-buttons">
+        <button class="confirm-btn" onclick="changePassword()">Xác nhận</button>
+        <button class="cancel-btn" onclick="closeModal()">Hủy</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const originalValues = {};
+
+    window.onload = function() {
+      const inputs = document.querySelectorAll('.account-box input, .account-box select');
+      inputs.forEach(input => {
+        originalValues[input.id] = input.value;
+      });
+    };
+
+    function saveInfo() {
+      showStatus("✔️ Đã lưu thông tin thành công!", "#28a745");
+    }
+
+    function resetInfo() {
+      const inputs = document.querySelectorAll('.account-box input, .account-box select');
+      inputs.forEach(input => input.value = originalValues[input.id]);
+      showStatus("↩ Đã hoàn tác thay đổi.", "#d9534f");
+    }
+
+    function showStatus(message, color) {
+      const status = document.getElementById("statusMsg");
+      status.textContent = message;
+      status.style.color = color;
+      status.style.display = "block";
+      setTimeout(() => status.style.display = "none", 2000);
+    }
+
+    // 🔐 Modal
+    function openModal() {
+      document.getElementById("passwordModal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("passwordModal").style.display = "none";
+      document.getElementById("oldPass").value = "";
+      document.getElementById("newPass").value = "";
+      document.getElementById("confirmPass").value = "";
+    }
+
+    function changePassword() {
+      const oldPass = document.getElementById("oldPass").value;
+      const newPass = document.getElementById("newPass").value;
+      const confirmPass = document.getElementById("confirmPass").value;
+
+      if (!oldPass || !newPass || !confirmPass) {
+        alert("Vui lòng nhập đầy đủ các trường.");
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        alert("Mật khẩu xác nhận không khớp.");
+        return;
+      }
+
+      closeModal();
+      showStatus("🔑 Đổi mật khẩu thành công!", "#28a745");
+    }
+
+    window.onclick = function(e) {
+      const modal = document.getElementById("passwordModal");
+      if (e.target === modal) closeModal();
+    };
+  </script>
+</body>
+</html>

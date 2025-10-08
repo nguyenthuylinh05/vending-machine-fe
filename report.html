@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Báo cáo doanh thu - Máy bán nước</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f7f9fb;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background: #d32f2f;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 26px;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 25px 40px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    .tab {
+      padding: 12px 25px;
+      margin: 0 10px;
+      border-radius: 6px;
+      border: none;
+      background: #eee;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .tab.active {
+      background: #d32f2f;
+      color: white;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      color: #d32f2f;
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    select {
+      display: block;
+      margin: 0 auto 20px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #d32f2f;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .chart-container {
+      margin-top: 30px;
+    }
+
+    .total {
+      text-align: right;
+      font-weight: bold;
+      color: #d32f2f;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>📊 Báo cáo doanh thu & giao dịch</header>
+
+  <div class="container">
+    <!-- Thanh chọn -->
+    <div class="tabs">
+      <button class="tab active" onclick="showSection('time')">Theo thời gian</button>
+      <button class="tab" onclick="showSection('drink')">Theo loại nước</button>
+    </div>
+
+    <!-- 🕒 Thống kê theo thời gian -->
+    <section id="time" class="section active">
+      <h2>Thống kê doanh thu theo thời gian</h2>
+      <select id="timeMode" onchange="loadTimeReport()">
+        <option value="day">Theo ngày</option>
+        <option value="month">Theo tháng</option>
+        <option value="year">Theo năm</option>
+      </select>
+
+      <table id="timeTable">
+        <thead>
+          <tr>
+            <th>Thời gian</th>
+            <th>Số lượng bán</th>
+            <th>Doanh thu (VNĐ)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="total" id="timeTotal"></div>
+      <div class="chart-container">
+        <canvas id="timeChart" height="100"></canvas>
+      </div>
+    </section>
+
+    <!-- 🧃 Thống kê theo loại nước -->
+    <section id="drink" class="section">
+      <h2>Thống kê doanh thu theo phân loại</h2>
+      <table id="drinkTable">
+        <thead>
+          <tr>
+            <th>Vị trí</th>
+            <th>Tên nước</th>
+            <th>Số lượng đã bán</th>
+            <th>Doanh thu (VNĐ)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="total" id="drinkTotal"></div>
+      <div class="chart-container">
+        <canvas id="drinkChart" height="100"></canvas>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const data = [
+      { name: "Coca-Cola", pos: "Ô 1", sold: 12, price: 15000, date: "2025-10-08" },
+      { name: "Pepsi", pos: "Ô 2", sold: 9, price: 14000, date: "2025-10-08" },
+      { name: "Sprite", pos: "Ô 3", sold: 7, price: 13000, date: "2025-10-07" },
+      { name: "Aquafina", pos: "Ô 4", sold: 15, price: 10000, date: "2025-10-07" },
+      { name: "Coca-Cola", pos: "Ô 1", sold: 10, price: 15000, date: "2025-09-30" },
+      { name: "Pepsi", pos: "Ô 2", sold: 14, price: 14000, date: "2025-09-30" },
+      { name: "Coca-Cola", pos: "Ô 1", sold: 30, price: 15000, date: "2025-09-01" },
+      { name: "Pepsi", pos: "Ô 2", sold: 20, price: 14000, date: "2025-09-01" },
+      { name: "Sprite", pos: "Ô 3", sold: 10, price: 13000, date: "2024-10-08" }
+    ];
+
+    let drinkChart, timeChart;
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.querySelector(`.tab[onclick*='${sectionId}']`).classList.add('active');
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    function loadReport() {
+      loadDrinkReport();
+      loadTimeReport();
+    }
+
+    // 🧃 Theo loại nước
+    function loadDrinkReport() {
+      const summary = {};
+      data.forEach(item => {
+        if (!summary[item.name]) summary[item.name] = { pos: item.pos, sold: 0, total: 0 };
+        summary[item.name].sold += item.sold;
+        summary[item.name].total += item.sold * item.price;
+      });
+
+      const tbody = document.querySelector("#drinkTable tbody");
+      tbody.innerHTML = "";
+      let totalRevenue = 0, totalSold = 0;
+
+      Object.keys(summary).forEach(k => {
+        const s = summary[k];
+        totalRevenue += s.total;
+        totalSold += s.sold;
+        tbody.innerHTML += `
+          <tr>
+            <td>${s.pos}</td>
+            <td>${k}</td>
+            <td>${s.sold}</td>
+            <td>${s.total.toLocaleString()} VNĐ</td>
+          </tr>`;
+      });
+      document.getElementById("drinkTotal").innerText =
+        `Tổng doanh thu: ${totalRevenue.toLocaleString()} VNĐ | Tổng giao dịch: ${totalSold}`;
+      drawDrinkChart(summary);
+    }
+
+    // 🕒 Theo thời gian (Ngày / Tháng / Năm)
+    function loadTimeReport() {
+      const mode = document.getElementById("timeMode").value;
+      const summary = {};
+
+      data.forEach(item => {
+        let key;
+        if (mode === "day") key = item.date;
+        else if (mode === "month") key = item.date.slice(0, 7);
+        else key = item.date.slice(0, 4);
+
+        if (!summary[key]) summary[key] = { sold: 0, total: 0 };
+        summary[key].sold += item.sold;
+        summary[key].total += item.sold * item.price;
+      });
+
+      const tbody = document.querySelector("#timeTable tbody");
+      tbody.innerHTML = "";
+      let totalRevenue = 0, totalSold = 0;
+
+      Object.keys(summary).sort().forEach(time => {
+        const s = summary[time];
+        totalRevenue += s.total;
+        totalSold += s.sold;
+        tbody.innerHTML += `
+          <tr>
+            <td>${time}</td>
+            <td>${s.sold}</td>
+            <td>${s.total.toLocaleString()} VNĐ</td>
+          </tr>`;
+      });
+      document.getElementById("timeTotal").innerText =
+        `Tổng doanh thu: ${totalRevenue.toLocaleString()} VNĐ | Tổng giao dịch: ${totalSold}`;
+      drawTimeChart(summary, mode);
+    }
+
+    // 🎨 Biểu đồ
+    function drawDrinkChart(summary) {
+      const ctx = document.getElementById("drinkChart").getContext("2d");
+      const labels = Object.keys(summary);
+      const sold = labels.map(k => summary[k].sold);
+      const rev = labels.map(k => summary[k].total);
+      if (drinkChart) drinkChart.destroy();
+      drinkChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            { label: "Số lượng bán", data: sold, backgroundColor: "rgba(54,162,235,0.7)" },
+            { label: "Doanh thu (VNĐ)", data: rev, backgroundColor: "rgba(255,99,132,0.7)" }
+          ]
+        }
+      });
+    }
+
+    function drawTimeChart(summary, mode) {
+      const ctx = document.getElementById("timeChart").getContext("2d");
+      const labels = Object.keys(summary).sort();
+      const sold = labels.map(k => summary[k].sold);
+      const rev = labels.map(k => summary[k].total);
+      if (timeChart) timeChart.destroy();
+      timeChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            { label: "Số lượng bán", data: sold, borderColor: "rgba(54,162,235,0.9)", fill: false },
+            { label: "Doanh thu (VNĐ)", data: rev, borderColor: "rgba(255,99,132,0.9)", fill: false }
+          ]
+        },
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: `Biểu đồ thống kê theo ${mode === "day" ? "ngày" : mode === "month" ? "tháng" : "năm"}`
+            }
+          }
+        }
+      });
+    }
+
+    window.onload = loadReport;
+  </script>
+</body>
+</html>
