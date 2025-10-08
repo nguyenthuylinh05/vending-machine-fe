@@ -35,6 +35,7 @@
         text-align: center;
         transition: 0.3s;
         border-top: 10px solid #d32f2f;
+        position: relative;
       }
       .drink-box:hover {
         transform: translateY(-5px);
@@ -95,6 +96,30 @@
         min-width: 35px;
         text-align: center;
         color: #333;
+      }
+
+      /* Empty state */
+      .drink-box.empty {
+        border-top-color: #c62828;
+        background: #fff6f6;
+      }
+
+      .drink-box.empty .count {
+        color: #b71c1c;
+      }
+
+      .drink-box .empty-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: inline-block;
+        padding: 6px 10px;
+        background: #b71c1c;
+        color: white;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
       }
 
       .update-btn {

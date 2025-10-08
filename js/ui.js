@@ -40,16 +40,24 @@ export async function renderAll() {
           : "Chưa gán sản phẩm");
       const price = product?.price != null ? vnd(product.price) : "-";
 
+      const isEmpty = Number(slot.quantity) === 0;
+
+      // thêm class .empty khi hết hàng
       return `
-        <div class="drink-box" data-slot-id="${slot.id}">
+        <div class="drink-box ${isEmpty ? "empty" : ""}" data-slot-id="${slot.id}">
           <h3>Ô ${slot.id}</h3>
           <p class="drink-name">${escapeHtml(name)}</p>
           <p class="price">Giá: ${price}</p>
           <div class="quantity">
-            <button type="button" class="btn-dec" aria-label="Giảm số lượng">-</button>
+            <button type="button" class="btn-dec" aria-label="Giảm số lượng" ${isEmpty ? "disabled" : ""}>-</button>
             <span class="count" aria-live="polite">${slot.quantity}</span>
-            <button type="button" class="btn-inc" aria-label="Tăng số lượng">+</button>
+            <button type="button" class="btn-inc" aria-label="Tăng số lượng" ${isEmpty ? "disabled" : ""}>+</button>
           </div>
+          ${
+            isEmpty
+              ? `<div class="empty-badge">⚠️ Hết hàng</div>`
+              : ""
+          }
           <button type="button" class="update-btn btn-update">Cập nhật</button>
         </div>
       `;
@@ -58,6 +66,7 @@ export async function renderAll() {
 
   container.innerHTML = frags.join("");
 }
+
 
 export function setupEventDelegation() {
   const container = $("#drinkContainer");
