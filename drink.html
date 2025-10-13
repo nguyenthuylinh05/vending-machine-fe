@@ -35,6 +35,7 @@
         text-align: center;
         transition: 0.3s;
         border-top: 10px solid #d32f2f;
+        position: relative;
       }
       .drink-box:hover {
         transform: translateY(-5px);
@@ -97,6 +98,30 @@
         color: #333;
       }
 
+      /* Empty state */
+      .drink-box.empty {
+        border-top-color: #c62828;
+        background: #f1e6e6;
+      }
+
+      .drink-box.empty .count {
+        color: #b71c1c;
+      }
+
+      .drink-box .empty-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: inline-block;
+        padding: 6px 10px;
+        background: #b71c1c;
+        color: white;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      }
+
       .update-btn {
         margin-top: 12px;
         padding: 8px 14px;
@@ -107,6 +132,7 @@
         cursor: pointer;
         font-size: 15px;
         transition: 0.3s;
+        opacity: 0.9;
       }
 
       .update-btn:hover {
@@ -194,245 +220,29 @@
     </style>
   </head>
   <body>
-    <h2>🍹 Quản lý máy bán nước</h2>
-    <div class="container">
-      <div class="drink-box">
-        <h3>Ô 1</h3>
-        <p class="drink-name">Coca Cola</p>
-        <p class="price">Giá: 12.000₫</p>
-        <div class="quantity">
-          <button onclick="decrease(1)">-</button>
-          <span id="count1" class="count">10</span>
-          <button onclick="increase(1)">+</button>
-        </div>
-        <button class="update-btn" onclick="openModal(1)">Cập nhật</button>
-      </div>
+    <header class="header">
+      <h1>Tủ đồ uống</h1>
+    </header>
 
-      <!-- Ô 2 -->
-      <div class="drink-box">
-        <h3>Ô 2</h3>
-        <p class="drink-name">Pepsi</p>
-        <p class="price">Giá: 10.000₫</p>
-        <div class="quantity">
-          <button onclick="decrease(2)">-</button>
-          <span id="count2" class="count">8</span>
-          <button onclick="increase(2)">+</button>
-        </div>
-        <button class="update-btn" onclick="openModal(2)">Cập nhật</button>
-      </div>
+    <main>
+      <div id="drinkContainer" class="container"></div>
+    </main>
 
-      <!-- Ô 3 -->
-      <div class="drink-box">
-        <h3>Ô 3</h3>
-        <p class="drink-name">Sprite</p>
-        <p class="price">Giá: 9.000₫</p>
-        <div class="quantity">
-          <button onclick="decrease(3)">-</button>
-          <span id="count3" class="count">12</span>
-          <button onclick="increase(3)">+</button>
-        </div>
-        <button class="update-btn" onclick="openModal(3)">Cập nhật</button>
-      </div>
-
-      <!-- Ô 4 -->
-      <div class="drink-box">
-        <h3>Ô 4</h3>
-        <p class="drink-name">Fanta</p>
-        <p class="price">Giá: 15.000₫</p>
-        <div class="quantity">
-          <button onclick="decrease(4)">-</button>
-          <span id="count4" class="count">15</span>
-          <button onclick="increase(4)">+</button>
-        </div>
-        <button class="update-btn" onclick="openModal(4)">Cập nhật</button>
-      </div>
-    </div>
-
-    <!-- Popup modal -->
-    <div id="modal" class="modal">
-      <div class="modal-content">
-        <h3>Cập nhật số lượng</h3>
-        <input type="number" id="modalInput" min="0" />
-        <div class="modal-buttons">
-          <button class="confirm-btn" onclick="confirmUpdate()">
-            Xác nhận
-          </button>
-          <button class="cancel-btn" onclick="closeModal()">Hủy</button>
+    <div id="modal" class="modal" aria-hidden="true">
+      <div
+        class="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <h2 id="modalTitle">Cập nhật số lượng</h2>
+        <input id="modalInput" type="number" min="0" inputmode="numeric" />
+        <div class="modal-actions">
+          <button id="confirmUpdate" class="update-btn">Xác nhận</button>
+          <button id="closeModal" class="cancel-btn">Hủy</button>
         </div>
       </div>
     </div>
-
-    <script>
-      const API_PRODUCT_BASE = "http://localhost:5000/api/products/";
-      let currentId = null;
-      const API_SLOTS = "http://localhost:5000/api/slots";
-      const productCache = new Map();
-
-      function formatVND(amount) {
-        if (amount == null || isNaN(amount)) return "-";
-        // đảm bảo int
-        const n = parseInt(amount, 10);
-        return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      }
-
-      async function fetchSlots() {
-        try {
-          const res = await fetch(API_SLOTS);
-          if (!res.ok) throw new Error("Lỗi mạng: " + res.status);
-          const data = await res.json();
-
-          const slots = data?.metadata?.slots;
-          if (!Array.isArray(slots)) {
-            console.warn("Không tìm thấy metadata.slots trong response:", data);
-            return;
-          }
-
-          slots.forEach((slot) => {
-            const el = document.getElementById("count" + slot.id);
-            if (el) {
-              el.textContent = slot.quantity;
-            }
-          });
-        } catch (err) {
-          console.error("Lỗi khi fetch slots:", err);
-        }
-      }
-
-      window.onload = function () {
-        fetchSlots();
-      };
-      function increase(id) {
-        let count = document.getElementById("count" + id);
-        count.textContent = parseInt(count.textContent) + 1;
-      }
-
-      function decrease(id) {
-        let count = document.getElementById("count" + id);
-        let current = parseInt(count.textContent);
-        if (current > 0) {
-          count.textContent = current - 1;
-        }
-      }
-
-      function openModal(id) {
-        currentId = id;
-        let count = document.getElementById("count" + id).textContent;
-        document.getElementById("modalInput").value = count;
-        document.getElementById("modal").style.display = "flex";
-      }
-
-      function closeModal() {
-        document.getElementById("modal").style.display = "none";
-      }
-
-      function confirmUpdate() {
-        let newValue = document.getElementById("modalInput").value;
-        if (newValue !== "" && parseInt(newValue) >= 0) {
-          document.getElementById("count" + currentId).textContent =
-            parseInt(newValue);
-          closeModal();
-        } else {
-          alert("Vui lòng nhập số hợp lệ (>= 0).");
-        }
-      }
-
-      async function fetchProduct(productId) {
-        if (productCache.has(productId)) return productCache.get(productId);
-
-        try {
-          const res = await fetch(
-            API_PRODUCT_BASE + encodeURIComponent(productId)
-          );
-          if (!res.ok) {
-            console.warn("Lỗi fetch product", productId, res.status);
-            productCache.set(productId, null);
-            return null;
-          }
-          const json = await res.json();
-          const product = json?.metadata?.product ?? null;
-          productCache.set(productId, product);
-          return product;
-        } catch (err) {
-          console.error("Lỗi khi fetch product", productId, err);
-          productCache.set(productId, null);
-          return null;
-        }
-      }
-
-      async function fetchSlotsAndProducts() {
-        try {
-          const res = await fetch(API_SLOTS);
-          if (!res.ok) throw new Error("Lỗi mạng khi lấy slots: " + res.status);
-          const data = await res.json();
-          const slots = data?.metadata?.slots;
-          if (!Array.isArray(slots)) {
-            console.warn("Không tìm thấy metadata.slots:", data);
-            return;
-          }
-
-          // map slotId -> slot object {id, product_id, quantity}
-          const slotMap = new Map();
-          slots.forEach((s) => slotMap.set(Number(s.id), s));
-
-          // 1) cập nhật số lượng vào các span có sẵn (count{slotId})
-          slots.forEach((slot) => {
-            const el = document.getElementById("count" + slot.id);
-            if (el) el.textContent = slot.quantity;
-          });
-
-          // 2) duyệt các .drink-box trên trang, tìm slotId (từ span id countX), lấy product_id từ slotMap và fetch product
-          const boxes = document.querySelectorAll(".drink-box");
-          await Promise.all(
-            Array.from(boxes).map(async (box) => {
-              // tìm span.count trong box có id "count{slotId}"
-              const span = box.querySelector(".count[id^='count']");
-              if (!span) return; 
-
-              const match = span.id.match(/^count(\d+)$/);
-              if (!match) return;
-              const slotId = Number(match[1]);
-              const slot = slotMap.get(slotId);
-              if (!slot) {
-                return;
-              }
-
-              const productId = slot.product_id;
-              if (productId == null) return;
-
-              const product = await fetchProduct(productId);
-              const nameEl = box.querySelector(".drink-name");
-              const priceEl = box.querySelector(".price");
-
-              if (product) {
-                if (nameEl)
-                  nameEl.textContent = product.name ?? `Sản phẩm #${productId}`;
-                if (priceEl) {
-                  const priceFormatted = formatVND(product.price);
-                  priceEl.textContent = `Giá: ${priceFormatted}₫`;
-                }
-              } else {
-                // fallback nếu không lấy được product
-                if (nameEl) nameEl.textContent = `Sản phẩm #${productId}`;
-                if (priceEl) priceEl.textContent = `Giá: -`;
-              }
-            })
-          );
-        } catch (err) {
-          console.error("Lỗi khi fetch slots và products:", err);
-        }
-      }
-
-      window.onclick = function (event) {
-        let modal = document.getElementById("modal");
-        if (event.target == modal) {
-          closeModal();
-        }
-      };
-
-      window.onload = function () {
-        fetchSlotsAndProducts();
-        setInterval(fetchSlotsAndProducts, 15_000);
-      };
-    </script>
+    <script type="module" src="./js/main.js"></script>
   </body>
 </html>
