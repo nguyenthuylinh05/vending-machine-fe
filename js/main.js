@@ -2,13 +2,13 @@
 import { renderAll, setupEventDelegation, getBusy } from "./ui.js";
 
 let refreshTimer = null;
-const REFRESH_MS = 15000;
+const REFRESH_MS = 3000;
 
 init();
 
 async function init() {
   setupEventDelegation();
-  await renderAll(); 
+  await renderAll();
   startAutoRefresh();
 }
 

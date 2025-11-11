@@ -55,13 +55,9 @@ export async function renderAll() {
           <p class="drink-name">${escapeHtml(name)}</p>
           <p class="price">Giá: ${price}</p>
           <div class="quantity">
-            <button type="button" class="btn-dec" aria-label="Giảm số lượng" ${
-              isEmpty ? "disabled" : ""
-            }>-</button>
+            
             <span class="count" aria-live="polite">${slot.quantity}</span>
-            <button type="button" class="btn-inc" aria-label="Tăng số lượng" ${
-              isEmpty ? "disabled" : ""
-            }>+</button>
+
           </div>
           ${isEmpty ? `<div class="empty-badge">⚠️ Hết hàng</div>` : ""}
           <button type="button" class="update-btn btn-update">Cập nhật</button>
@@ -127,7 +123,35 @@ export function setupEventDelegation() {
       if (box) box.querySelector(".count").textContent = String(newValue);
 
       await updateSlotQuantity(currentSlotId, newValue);
-      await renderAll();
+
+      if (box) {
+        const countEl = box.querySelector(".count");
+        countEl.textContent = newValue;
+
+        const isEmpty = newValue === 0;
+
+        // Thêm / gỡ class "empty"
+        box.classList.toggle("empty", isEmpty);
+
+        // Cập nhật trạng thái nút
+        box.querySelectorAll(".btn-dec, .btn-inc").forEach((btn) => {
+          btn.disabled = isEmpty;
+        });
+
+        // Cập nhật badge hết hàng
+        const badge = box.querySelector(".empty-badge");
+        if (isEmpty) {
+          if (!badge) {
+            const newBadge = document.createElement("div");
+            newBadge.className = "empty-badge";
+            newBadge.textContent = "⚠️ Hết hàng";
+            box.appendChild(newBadge);
+          }
+        } else if (badge) {
+          badge.remove();
+        }
+      }
+
       closeModal();
     } catch (err) {
       alert("Lưu thất bại: " + err.message);
