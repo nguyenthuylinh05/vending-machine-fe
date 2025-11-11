@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quản lý Nước - AutoDrink</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f7f9fc;
+        margin: 0;
+        padding: 20px;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #dd2476;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .drink-box {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: 0.3s;
+        border-top: 10px solid #d32f2f;
+        position: relative;
+      }
+      .drink-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Ô số */
+      .drink-box h3 {
+        margin-bottom: 8px;
+        font-size: 22px;
+        font-weight: bold;
+        color: #e63946;
+      }
+
+      /* Tên nước */
+      .drink-box .drink-name {
+        margin: 4px 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #b60037;
+        letter-spacing: 0.5px;
+      }
+
+      /* Giá tiền */
+      .drink-box .price {
+        margin: 6px 0;
+        font-size: 16px;
+        font-weight: bold;
+        color: #388e3c;
+      }
+
+      .quantity {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 10px;
+      }
+
+      .quantity button {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 18px;
+        cursor: pointer;
+        background: linear-gradient(90deg, #ff512f, #dd2476);
+        color: white;
+        transition: 0.3s;
+      }
+
+      .quantity button:hover {
+        opacity: 0.85;
+      }
+
+      .count {
+        font-size: 20px;
+        font-weight: bold;
+        min-width: 35px;
+        text-align: center;
+        color: #333;
+      }
+
+      /* Empty state */
+      .drink-box.empty {
+        border-top-color: #c62828;
+        background: #f1e6e6;
+      }
+
+      .drink-box.empty .count {
+        color: #b71c1c;
+      }
+
+      .drink-box .empty-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: inline-block;
+        padding: 6px 10px;
+        background: #b71c1c;
+        color: white;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      }
+
+      .update-btn {
+        margin-top: 12px;
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #ff512f, #dd2476);
+        color: white;
+        cursor: pointer;
+        font-size: 15px;
+        transition: 0.3s;
+        opacity: 0.9;
+      }
+
+      .update-btn:hover {
+        background: #0056b3;
+      }
+
+      /* Popup modal */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        width: 300px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-content h3 {
+        margin-bottom: 15px;
+        color: #dd2476;
+      }
+
+      .modal-content input {
+        width: 80%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .modal-buttons {
+        display: flex;
+        justify-content: space-around;
+      }
+
+      .modal-buttons button {
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        color: white;
+        transition: 0.3s;
+      }
+
+      .confirm-btn {
+        background: #28a745;
+      }
+      .confirm-btn:hover {
+        background: #218838;
+      }
+
+      .cancel-btn {
+        background: #dc3545;
+      }
+      .cancel-btn:hover {
+        background: #a71d2a;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <h1>Tủ đồ uống</h1>
+    </header>
+
+    <main>
+      <div id="drinkContainer" class="container"></div>
+    </main>
+
+    <div id="modal" class="modal" aria-hidden="true">
+      <div
+        class="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <h2 id="modalTitle">Cập nhật số lượng</h2>
+        <input id="modalInput" type="number" min="0" inputmode="numeric" />
+        <div class="modal-actions">
+          <button id="confirmUpdate" class="update-btn">Xác nhận</button>
+          <button id="closeModal" class="cancel-btn">Hủy</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Báo cáo doanh thu - AutoDrink</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f7f9fb;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      header {
+        background: #d32f2f;
+        color: white;
+        text-align: center;
+        padding: 20px;
+        font-size: 26px;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 25px 40px;
+      }
+
+      .tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 25px;
+      }
+
+      .tab {
+        padding: 12px 25px;
+        margin: 0 10px;
+        border-radius: 6px;
+        border: none;
+        background: #eee;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: 0.3s;
+      }
+
+      .tab.active {
+        background: #d32f2f;
+        color: white;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+      }
+
+      h2 {
+        color: #d32f2f;
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+
+      select {
+        display: block;
+        margin: 0 auto 20px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #d32f2f;
+        color: white;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      .chart-container {
+        margin-top: 30px;
+      }
+
+      .total {
+        text-align: right;
+        font-weight: bold;
+        color: #d32f2f;
+        margin-top: 10px;
+        font-size: 16px;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .pagination button {
+        padding: 6px 12px;
+        border: none;
+        background: #d32f2f;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .pagination button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      .section {
+        display: none;
+      }
+
+      .section.active {
+        display: block;
+        animation: fadeIn 0.4s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>📊 Báo cáo doanh thu & giao dịch</header>
+
+    <div class="container">
+      <div class="tabs">
+        <button class="tab active" onclick="showSection('time')">
+          Theo thời gian
+        </button>
+        <button class="tab" onclick="showSection('drink')">
+          Theo loại nước
+        </button>
+      </div>
+
+      <section id="time" class="section active">
+        <h2>Thống kê doanh thu theo thời gian</h2>
+        <select id="timeMode" onchange="loadTimeReport()">
+          <option value="day">Theo ngày</option>
+          <option value="month">Theo tháng</option>
+          <option value="year">Theo năm</option>
+        </select>
+
+        <table id="timeTable">
+          <thead>
+            <tr>
+              <th>Thời gian</th>
+              <th>Số lượng bán</th>
+              <th>Doanh thu (VNĐ)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="pagination" id="timePagination"></div>
+        <div class="total" id="timeTotal"></div>
+        <div class="chart-container">
+          <canvas id="timeChart" height="100"></canvas>
+        </div>
+      </section>
+
+      <section id="drink" class="section">
+        <h2>Thống kê doanh thu theo loại nước</h2>
+        <table id="drinkTable">
+          <thead>
+            <tr>
+              <th>Tên nước</th>
+              <th>Số lượng bán</th>
+              <th>Doanh thu (VNĐ)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="pagination" id="drinkPagination"></div>
+        <div class="total" id="drinkTotal"></div>
+        <div class="chart-container">
+          <canvas id="drinkChart" height="100"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <script type="module">
+      import {
+        getTransactions,
+        buildProductNameMap,
+      } from "./js/transactions.js";
+      import { vnd } from "./js/stats.js";
+      import { drawDrinkChart, drawTimeChart } from "./js/charts.js";
+
+      const $ = (s) => document.querySelector(s);
+      const PAGE_SIZE = 5;
+
+      let transactions = [];
+      let productNameMap = new Map();
+      let drinkSummary = {};
+      let timeSummary = {};
+      let currentDrinkPage = 1;
+      let currentTimePage = 1;
+
+      function showSection(id) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll(".section")
+          .forEach((s) => s.classList.remove("active"));
+        document
+          .querySelector(`.tab[onclick*='${id}']`)
+          .classList.add("active");
+        document.getElementById(id).classList.add("active");
+      }
+
+      async function init() {
+        try {
+          transactions = await getTransactions();
+          productNameMap = await buildProductNameMap(transactions);
+          loadDrinkReport();
+          loadTimeReport();
+        } catch (err) {
+          console.error(err);
+          alert("Không thể tải báo cáo: " + err.message);
+        }
+      }
+
+      function paginateAndRender(tableId, data, page, paginationId) {
+        const tbody = $(`#${tableId} tbody`);
+        const pagination = $(`#${paginationId}`);
+        const keys = Object.keys(data);
+        const totalPages = Math.ceil(keys.length / PAGE_SIZE);
+        page = Math.max(1, Math.min(page, totalPages));
+
+        const start = (page - 1) * PAGE_SIZE;
+        const end = start + PAGE_SIZE;
+        const pageKeys = keys.slice(start, end);
+
+        tbody.innerHTML = "";
+        pageKeys.forEach((k) => {
+          const s = data[k];
+          tbody.innerHTML += `
+        <tr>
+          <td>${k}</td>
+          <td>${s.sold}</td>
+          <td>${vnd(s.total)}</td>
+        </tr>`;
+        });
+
+        pagination.innerHTML = `
+      <button ${
+        page === 1 ? "disabled" : ""
+      } id="prev_${tableId}">« Trước</button>
+      <span>Trang ${page} / ${totalPages || 1}</span>
+      <button ${
+        page === totalPages ? "disabled" : ""
+      } id="next_${tableId}">Sau »</button>
+    `;
+
+        $(`#prev_${tableId}`)?.addEventListener("click", () => {
+          if (tableId === "drinkTable") {
+            currentDrinkPage--;
+            paginateAndRender(
+              "drinkTable",
+              drinkSummary,
+              currentDrinkPage,
+              "drinkPagination"
+            );
+          } else {
+            currentTimePage--;
+            paginateAndRender(
+              "timeTable",
+              timeSummary,
+              currentTimePage,
+              "timePagination"
+            );
+          }
+        });
+
+        $(`#next_${tableId}`)?.addEventListener("click", () => {
+          if (tableId === "drinkTable") {
+            currentDrinkPage++;
+            paginateAndRender(
+              "drinkTable",
+              drinkSummary,
+              currentDrinkPage,
+              "drinkPagination"
+            );
+          } else {
+            currentTimePage++;
+            paginateAndRender(
+              "timeTable",
+              timeSummary,
+              currentTimePage,
+              "timePagination"
+            );
+          }
+        });
+      }
+
+      function loadDrinkReport() {
+        drinkSummary = {};
+        for (const t of transactions) {
+          // Nếu API populate product, lấy từ t.product
+          const product =
+            typeof t.product === "object" && t.product
+              ? t.product
+              : {
+                  product_id: t.product_id,
+                  name: productNameMap.get(t.product_id),
+                };
+
+          const name =
+            product?.name || `Sản phẩm #${product?.product_id || "?"}`;
+
+          if (!drinkSummary[name]) drinkSummary[name] = { sold: 0, total: 0 };
+          drinkSummary[name].sold += Number(t.quantity || 1);
+          drinkSummary[name].total += Number(t.total_price || 0);
+        }
+
+        let totalRev = 0,
+          totalSold = 0;
+        Object.values(drinkSummary).forEach((s) => {
+          totalRev += s.total;
+          totalSold += s.sold;
+        });
+
+        $("#drinkTotal").textContent = `Tổng doanh thu: ${vnd(
+          totalRev
+        )} | Tổng sản phẩm bán: ${totalSold}`;
+        paginateAndRender(
+          "drinkTable",
+          drinkSummary,
+          currentDrinkPage,
+          "drinkPagination"
+        );
+        drawDrinkChart(drinkSummary);
+      }
+
+      function loadTimeReport() {
+        const mode = $("#timeMode").value;
+        timeSummary = {};
+
+        for (const t of transactions) {
+          const date = new Date(t.created_at);
+          let key =
+            mode === "day"
+              ? date.toISOString().slice(0, 10)
+              : mode === "month"
+              ? date.toISOString().slice(0, 7)
+              : date.getFullYear();
+
+          if (!timeSummary[key]) timeSummary[key] = { sold: 0, total: 0 };
+          timeSummary[key].sold += Number(t.quantity || 1);
+          timeSummary[key].total += Number(t.total_price || 0);
+        }
+
+        let totalRev = 0,
+          totalSold = 0;
+        Object.values(timeSummary).forEach((s) => {
+          totalRev += s.total;
+          totalSold += s.sold;
+        });
+
+        $("#timeTotal").textContent = `Tổng doanh thu: ${vnd(
+          totalRev
+        )} | Tổng giao dịch: ${totalSold}`;
+        paginateAndRender(
+          "timeTable",
+          timeSummary,
+          currentTimePage,
+          "timePagination"
+        );
+        drawTimeChart(timeSummary, mode);
+      }
+
+      window.onload = init;
+      window.showSection = showSection;
+      window.loadTimeReport = loadTimeReport;
+    </script>
+  </body>
+</html>

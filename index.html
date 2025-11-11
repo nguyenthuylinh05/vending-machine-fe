@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý máy bán nước tự động</title>
+  <style>
+    /* --- Reset mặc định --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+      overflow: hidden; /* Không tràn ngoài body */
+    }
+
+    /* --- Tổng bố cục theo chiều dọc --- */
+    .layout {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* --- Header và Footer --- */
+    .header, .footer {
+      flex: 0 0 auto;
+      height: 70px;
+    }
+
+    .footer {
+      height: 60px;
+    }
+
+    /* --- Phần thân giữa (menu - content - right) --- */
+    .main {
+      flex: 1 1 auto;
+      display: flex;
+      overflow: hidden; /* tránh tràn */
+    }
+
+    /* --- 3 cột --- */
+    .menu, .content, .right {
+      height: 100%;
+    }
+
+    .menu {
+      flex: 0 0 20%;
+      min-width: 200px;
+    }
+
+    .content {
+  flex: 1;
+  /* overflow-y: auto; */
+    }
+
+    .right {
+      flex: 0 0 20%;
+      min-width: 200px;
+    }
+
+    /* --- Iframe --- */
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* --- Cho phép cuộn dọc toàn trang nếu cần --- */
+    body {
+  /* overflow-y: auto; */
+  background-color: #f9f9f9;
+    }
+
+    /* --- Đáp ứng màn hình nhỏ --- */
+    @media (max-width: 900px) {
+      .menu, .right {
+        display: none; /* Ẩn menu và cột phải trên màn hình nhỏ */
+      }
+      .content {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Header -->
+    <div class="header">
+      <iframe src="T1.html"></iframe>
+    </div>
+
+    <!-- Phần thân: menu - nội dung - bên phải -->
+    <div class="main">
+      <div class="menu"><iframe src="T2.html"></iframe></div>
+      <div class="content"><iframe src="home.html" name="mainFrame"></iframe></div>
+      <div class="right"><iframe src="T4.html"></iframe></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <iframe src="T5.html"></iframe>
+    </div>
+  </div>
+</body>
+</html>
