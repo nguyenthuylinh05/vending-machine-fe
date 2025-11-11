@@ -1,4 +1,3 @@
-// js/home.main.js
 const API_BASE = "http://localhost:5000/api";
 
 function vnd(n) {
@@ -9,7 +8,10 @@ function vnd(n) {
 async function getData(endpoint) {
   const token = sessionStorage.getItem("token");
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetch(`${API_BASE}${endpoint}`, { headers });
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    headers,
+    cache: "no-store",
+  });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`${res.status} ${text}`);
@@ -35,7 +37,6 @@ async function loadStats() {
       0
     );
 
-    // Vị trí ít nước nhất
     let lowestSlot = "N/A";
     if (slotList.length) {
       const minSlot = slotList.reduce((a, b) =>
@@ -44,14 +45,18 @@ async function loadStats() {
       lowestSlot = `Ô ${minSlot.slot_id} (${minSlot.quantity} chai)`;
     }
 
+    // Cập nhật DOM
     document.getElementById("totalRevenue").textContent = vnd(totalRevenue);
     document.getElementById("totalTransactions").textContent =
       totalTransactions;
     document.getElementById("lowestSlot").textContent = lowestSlot;
   } catch (err) {
     console.error(err);
-    alert("Không thể tải thống kê: " + err.message);
+    // Không hiện alert liên tục
+    console.warn("⚠️ Lỗi khi tải thống kê:", err.message);
   }
 }
 
 loadStats();
+
+setInterval(loadStats, 3000);

@@ -250,16 +250,37 @@
           productNameMap = await buildProductNameMap(transactions);
           loadDrinkReport();
           loadTimeReport();
+
+          // 🔁 Tự động cập nhật mỗi 3 giây
+          setInterval(autoRefresh, 3000);
         } catch (err) {
           console.error(err);
           alert("Không thể tải báo cáo: " + err.message);
         }
       }
 
+      async function autoRefresh() {
+        try {
+          const newTransactions = await getTransactions();
+          if (newTransactions.length !== transactions.length) {
+            transactions = newTransactions;
+            productNameMap = await buildProductNameMap(transactions);
+            loadDrinkReport();
+            loadTimeReport();
+            console.log("🔄 Báo cáo đã cập nhật tự động");
+          }
+        } catch (err) {
+          console.warn("⚠️ Không thể cập nhật tự động:", err.message);
+        }
+      }
+
       function paginateAndRender(tableId, data, page, paginationId) {
         const tbody = $(`#${tableId} tbody`);
         const pagination = $(`#${paginationId}`);
-        const keys = Object.keys(data);
+
+        // 🔽 Sắp xếp key mới nhất trước
+        const keys = Object.keys(data).sort((a, b) => b.localeCompare(a));
+
         const totalPages = Math.ceil(keys.length / PAGE_SIZE);
         page = Math.max(1, Math.min(page, totalPages));
 
@@ -332,7 +353,6 @@
       function loadDrinkReport() {
         drinkSummary = {};
         for (const t of transactions) {
-          // Nếu API populate product, lấy từ t.product
           const product =
             typeof t.product === "object" && t.product
               ? t.product
