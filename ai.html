@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thông tin tiền</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      text-align: center;
+      vertical-align: middle;
+      padding: 12px;
+    }
+
+    /* Tiêu đề nhỏ hơn */
+    th {
+      background: #dc3545;
+      color: white;
+      font-size: 20px; /* nhỏ hơn td */
+      padding: 10px;
+    }
+
+    /* Hàng dữ liệu cao hơn */
+    td {
+      font-size: 22px;
+      height: 180px; /* tăng chiều cao cho hàng dữ liệu */
+    }
+
+    tr {
+      border-bottom: 1px solid #ddd;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    td img {
+      width: 220px;  /* ảnh to hơn */
+      height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    td span {
+      font-weight: bold;
+      color: #333;
+      font-size: 16px;
+    }
+
+    /* Tối ưu độ rộng cột */
+    th:first-child, td:first-child {
+      width: 40%;  /* cột ảnh chiếm nhiều không gian */
+    }
+    th:nth-child(2), td:nth-child(2),
+    th:nth-child(3), td:nth-child(3),
+    th:nth-child(4), td:nth-child(4) {
+      width: 20%;  /* các cột còn lại vừa đủ */
+    }
+
+    @media screen and (max-width: 768px) {
+      td img {
+        width: 160px;
+        height: 100px;
+      }
+      th, td {
+        font-size: 14px;
+        padding: 6px;
+      }
+      td {
+        height: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <table>
+      <thead>
+        <tr>
+          <th>Hình ảnh</th>
+          <th>Mệnh giá</th>
+          <th>Độ tin cậy</th>
+          <th>Thời gian tạo</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- Dữ liệu sẽ hiển thị tại đây -->
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    // Demo dữ liệu, thay bằng dữ liệu thực tế từ AI
+    const data = [
+      {
+        image: "https://cdn-icons-png.flaticon.com/512/268/268795.png",
+        denomination: "500,000 VND",
+        confidence: "98%",
+        created_at: "2025-11-12 09:00:00"
+      },
+      {
+        image: "https://cdn-icons-png.flaticon.com/512/268/268794.png",
+        denomination: "200,000 VND",
+        confidence: "95%",
+        created_at: "2025-11-12 09:02:00"
+      },
+      {
+        image: "https://cdn-icons-png.flaticon.com/512/268/268793.png",
+        denomination: "100,000 VND",
+        confidence: "97%",
+        created_at: "2025-11-12 09:05:00"
+      }
+    ];
+
+    const tbody = document.getElementById("tableBody");
+
+    data.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><img src="${item.image}" alt="${item.denomination}"></td>
+        <td><span>${item.denomination}</span></td>
+        <td><span>${item.confidence}</span></td>
+        <td><span>${item.created_at}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  </script>
+</body>
+</html>
