@@ -1,145 +1,188 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thông tin tiền</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f4f8;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      text-align: center;
-      vertical-align: middle;
-      padding: 12px;
-    }
-
-    /* Tiêu đề nhỏ hơn */
-    th {
-      background: #dc3545;
-      color: white;
-      font-size: 20px; /* nhỏ hơn td */
-      padding: 10px;
-    }
-
-    /* Hàng dữ liệu cao hơn */
-    td {
-      font-size: 22px;
-      height: 180px; /* tăng chiều cao cho hàng dữ liệu */
-    }
-
-    tr {
-      border-bottom: 1px solid #ddd;
-    }
-
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-
-    td img {
-      width: 220px;  /* ảnh to hơn */
-      height: 140px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    td span {
-      font-weight: bold;
-      color: #333;
-      font-size: 16px;
-    }
-
-    /* Tối ưu độ rộng cột */
-    th:first-child, td:first-child {
-      width: 40%;  /* cột ảnh chiếm nhiều không gian */
-    }
-    th:nth-child(2), td:nth-child(2),
-    th:nth-child(3), td:nth-child(3),
-    th:nth-child(4), td:nth-child(4) {
-      width: 20%;  /* các cột còn lại vừa đủ */
-    }
-
-    @media screen and (max-width: 768px) {
-      td img {
-        width: 160px;
-        height: 100px;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thông tin tiền</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f4f8;
+        margin: 0;
+        padding: 20px;
+        color: #333;
       }
-      th, td {
-        font-size: 14px;
-        padding: 6px;
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
+
+      th,
       td {
-        height: 120px;
+        text-align: center;
+        vertical-align: middle;
+        padding: 12px;
       }
-    }
-  </style>
-</head>
-<body>
-  <main>
-    <table>
-      <thead>
+
+      /* Tiêu đề nhỏ hơn */
+      th {
+        background: #dc3545;
+        color: white;
+        font-size: 20px; /* nhỏ hơn td */
+        padding: 10px;
+      }
+
+      /* Hàng dữ liệu cao hơn */
+      td {
+        font-size: 22px;
+        height: 180px; /* tăng chiều cao cho hàng dữ liệu */
+      }
+
+      tr {
+        border-bottom: 1px solid #ddd;
+      }
+
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      td img {
+        width: 220px; /* ảnh to hơn */
+        height: 220px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      td span {
+        font-weight: bold;
+        color: #333;
+        font-size: 16px;
+      }
+
+      /* Tối ưu độ rộng cột */
+      th:first-child,
+      td:first-child {
+        width: 40%; /* cột ảnh chiếm nhiều không gian */
+      }
+      th:nth-child(2),
+      td:nth-child(2),
+      th:nth-child(3),
+      td:nth-child(3),
+      th:nth-child(4),
+      td:nth-child(4) {
+        width: 20%; /* các cột còn lại vừa đủ */
+      }
+
+      @media screen and (max-width: 768px) {
+        td img {
+          width: 160px;
+          height: 100px;
+        }
+        th,
+        td {
+          font-size: 14px;
+          padding: 6px;
+        }
+        td {
+          height: 120px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <table>
+        <thead>
+          <tr>
+            <th>Hình ảnh</th>
+            <th>Mệnh giá</th>
+            <th>Độ tin cậy</th>
+            <th>Thời gian tạo</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Dữ liệu sẽ hiển thị tại đây -->
+        </tbody>
+      </table>
+    </main>
+
+    <script>
+      const API_URL = "http://localhost:5000/api/money/";
+      const tbody = document.getElementById("tableBody");
+
+      // Định dạng thời gian dễ đọc
+      function formatDate(isoString) {
+        const date = new Date(isoString);
+        return date.toLocaleString("vi-VN", {
+          hour12: false,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+      }
+
+      async function loadMoneyData() {
+        try {
+          const res = await fetch(API_URL);
+          const json = await res.json();
+
+          if (json.status !== "OK" || !json.metadata?.list) {
+            throw new Error("Không có dữ liệu hợp lệ từ server");
+          }
+
+          const list = json.metadata.list;
+
+          // Nếu không có bản ghi nào
+          if (!list.length) {
+            tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align:center; color: gray;">
+              Chưa có dữ liệu tiền được nhận diện
+            </td>
+          </tr>`;
+            return;
+          }
+
+          // Render danh sách
+          tbody.innerHTML = list
+            .map(
+              (item) => `
+          <tr>
+            <td>
+              <img src="${
+                item.image
+              }" alt="Money" style="width:240px; border-radius:6px;">
+            </td>
+            <td>${Number(item.amount).toLocaleString("vi-VN")} ₫</td>
+            <td>${(item.confident * 100).toFixed(0)}%</td>
+            <td>${formatDate(item.createdAt)}</td>
+          </tr>`
+            )
+            .join("");
+        } catch (err) {
+          console.error("Lỗi tải dữ liệu:", err);
+          tbody.innerHTML = `
         <tr>
-          <th>Hình ảnh</th>
-          <th>Mệnh giá</th>
-          <th>Độ tin cậy</th>
-          <th>Thời gian tạo</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <!-- Dữ liệu sẽ hiển thị tại đây -->
-      </tbody>
-    </table>
-  </main>
-
-  <script>
-    // Demo dữ liệu, thay bằng dữ liệu thực tế từ AI
-    const data = [
-      {
-        image: "https://cdn-icons-png.flaticon.com/512/268/268795.png",
-        denomination: "500,000 VND",
-        confidence: "98%",
-        created_at: "2025-11-12 09:00:00"
-      },
-      {
-        image: "https://cdn-icons-png.flaticon.com/512/268/268794.png",
-        denomination: "200,000 VND",
-        confidence: "95%",
-        created_at: "2025-11-12 09:02:00"
-      },
-      {
-        image: "https://cdn-icons-png.flaticon.com/512/268/268793.png",
-        denomination: "100,000 VND",
-        confidence: "97%",
-        created_at: "2025-11-12 09:05:00"
+          <td colspan="4" style="text-align:center; color:red;">
+            Lỗi khi tải dữ liệu từ server!
+          </td>
+        </tr>`;
+        }
       }
-    ];
 
-    const tbody = document.getElementById("tableBody");
-
-    data.forEach(item => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><img src="${item.image}" alt="${item.denomination}"></td>
-        <td><span>${item.denomination}</span></td>
-        <td><span>${item.confidence}</span></td>
-        <td><span>${item.created_at}</span></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  </script>
-</body>
+      // Gọi khi trang load
+      document.addEventListener("DOMContentLoaded", () => {
+        loadMoneyData(); // Lần đầu tải
+        setInterval(loadMoneyData, 3000); // Cập nhật tự động mỗi 3 giây
+      });
+    </script>
+  </body>
 </html>

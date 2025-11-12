@@ -48,7 +48,9 @@ export async function renderAll() {
       const isEmpty = Number(slot.quantity) === 0;
 
       return `
-        <div class="drink-box ${isEmpty ? "empty" : ""}" data-slot-id="${slot.slot_id}">
+        <div class="drink-box ${isEmpty ? "empty" : ""}" data-slot-id="${
+        slot.slot_id
+      }">
           <h3>Ô ${slot.slot_id}</h3>
           <p class="drink-name">${escapeHtml(name)}</p>
           <p class="price">Giá: ${price}</p>
@@ -59,7 +61,7 @@ export async function renderAll() {
           <button type="button" class="update-btn btn-update">Cập nhật</button>
           ${
             product
-              ? `<a href="edit_drink.html?id=${product.id}" class="gear-icon" title="Chỉnh sửa sản phẩm">
+              ? `<a href="edit_drink.html?id=${slot.slot_id}" class="gear-icon" title="Chỉnh sửa sản phẩm">
                    <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="edit" />
                  </a>`
               : ""
