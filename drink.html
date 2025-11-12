@@ -37,12 +37,38 @@
         border-top: 10px solid #d32f2f;
         position: relative;
       }
+
       .drink-box:hover {
         transform: translateY(-5px);
         box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
       }
 
-      /* Ô số */
+      /* 🔧 Biểu tượng bánh răng */
+      .gear-icon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #f1f1f1;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .gear-icon:hover {
+        background: #ddd;
+        transform: rotate(45deg);
+      }
+
+      .gear-icon img {
+        width: 16px;
+        height: 16px;
+      }
+
       .drink-box h3 {
         margin-bottom: 8px;
         font-size: 22px;
@@ -50,7 +76,6 @@
         color: #e63946;
       }
 
-      /* Tên nước */
       .drink-box .drink-name {
         margin: 4px 0;
         font-size: 18px;
@@ -59,7 +84,6 @@
         letter-spacing: 0.5px;
       }
 
-      /* Giá tiền */
       .drink-box .price {
         margin: 6px 0;
         font-size: 16px;
@@ -96,30 +120,6 @@
         min-width: 35px;
         text-align: center;
         color: #333;
-      }
-
-      /* Empty state */
-      .drink-box.empty {
-        border-top-color: #c62828;
-        background: #f1e6e6;
-      }
-
-      .drink-box.empty .count {
-        color: #b71c1c;
-      }
-
-      .drink-box .empty-badge {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        display: inline-block;
-        padding: 6px 10px;
-        background: #b71c1c;
-        color: white;
-        border-radius: 12px;
-        font-size: 13px;
-        font-weight: 600;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       }
 
       .update-btn {
@@ -178,12 +178,12 @@
         text-align: center;
       }
 
-      .modal-buttons {
+      .modal-actions {
         display: flex;
         justify-content: space-around;
       }
 
-      .modal-buttons button {
+      .modal-actions button {
         padding: 8px 14px;
         border: none;
         border-radius: 6px;
@@ -196,15 +196,9 @@
       .confirm-btn {
         background: #28a745;
       }
-      .confirm-btn:hover {
-        background: #218838;
-      }
 
       .cancel-btn {
         background: #dc3545;
-      }
-      .cancel-btn:hover {
-        background: #a71d2a;
       }
 
       @keyframes fadeIn {
@@ -219,30 +213,43 @@
       }
     </style>
   </head>
+
   <body>
     <header class="header">
       <h1>Tủ đồ uống</h1>
     </header>
 
     <main>
-      <div id="drinkContainer" class="container"></div>
+      <div id="drinkContainer" class="container">
+        <!-- Ví dụ: chỉ cần thêm biểu tượng này trong mỗi ô sản phẩm -->
+        <div class="drink-box">
+          <a href="edit_drink.html?id=1" class="gear-icon" title="Chỉnh sửa sản phẩm">
+            <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="edit" />
+          </a>
+          <h3>1</h3>
+          <div class="drink-name">Coca Cola</div>
+          <div class="price">12,000đ</div>
+          <div class="quantity">
+            <button>-</button>
+            <div class="count">8</div>
+            <button>+</button>
+          </div>
+          <button class="update-btn">Cập nhật số lượng</button>
+        </div>
+      </div>
     </main>
 
     <div id="modal" class="modal" aria-hidden="true">
-      <div
-        class="modal-content"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modalTitle"
-      >
-        <h2 id="modalTitle">Cập nhật số lượng</h2>
+      <div class="modal-content" role="dialog" aria-modal="true">
+        <h2>Cập nhật số lượng</h2>
         <input id="modalInput" type="number" min="0" inputmode="numeric" />
         <div class="modal-actions">
-          <button id="confirmUpdate" class="update-btn">Xác nhận</button>
+          <button id="confirmUpdate" class="confirm-btn">Xác nhận</button>
           <button id="closeModal" class="cancel-btn">Hủy</button>
         </div>
       </div>
     </div>
+
     <script type="module" src="./js/main.js"></script>
   </body>
 </html>

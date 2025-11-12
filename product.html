@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý sản phẩm nước</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    .product-container {
+      max-width: 950px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px 30px;
+    }
+
+    .product-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .product-header button {
+      padding: 10px 15px;
+      background: linear-gradient(90deg, #ff512f, #dd2476);;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .product-header button:hover {
+      background: #d32f2f;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color:#d32f2f;
+      color: white;
+    }
+
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    .product-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .product-info img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .btn {
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .btn-edit {
+      background: linear-gradient(90deg, #ff512f, #dd2476);;
+    }
+
+    .btn-delete {
+      background: #f44336;
+    }
+
+    .btn-edit:hover {
+      background: #1976D2;
+    }
+
+    .btn-delete:hover {
+      background: #d32f2f;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      width: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+      color: #333;
+      text-align: center;
+    }
+
+    .modal-content label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .modal-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .btn-save {
+      background: #d32f2f;
+    }
+
+    .btn-cancel {
+      background: #888;
+    }
+
+    .btn-save:hover { background: #d32f2f; }
+    .btn-cancel:hover { background: #666; }
+
+    .img-preview {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .img-preview img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Quản lý sản phẩm nước</h1>
+
+  <div class="product-container">
+    <div class="product-header">
+      <h3>Danh sách sản phẩm</h3>
+      <button id="btnAdd">+ Thêm sản phẩm</button>
+    </div>
+
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>Sản phẩm</th>
+          <th>Giá (₫)</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dữ liệu giả sẽ hiển thị ở đây -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Thêm sản phẩm</h2>
+
+      <label for="productName">Tên nước</label>
+      <input type="text" id="productName" placeholder="Nhập tên nước">
+
+      <label for="productPrice">Giá (₫)</label>
+      <input type="number" id="productPrice" placeholder="Nhập giá" min="0">
+
+      <label for="productImage">Ảnh sản phẩm</label>
+      <input type="file" id="productImage" accept="image/*">
+      <div class="img-preview" id="imgPreview" style="display:none;">
+        <img src="" alt="preview">
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn-save" id="saveBtn">Lưu</button>
+        <button class="btn-cancel" id="cancelBtn">Hủy</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== DỮ LIỆU GIẢ BAN ĐẦU =====
+    let products = [
+      { id: 1, name: "Coca-Cola", price: 12000, image: "https://cdn.tgdd.vn/Products/Images/2443/73440/bhx/nuoc-ngot-coca-cola-lon-320ml-202312181442377582.jpg" },
+      { id: 2, name: "Pepsi", price: 11000, image: "https://cdn.tgdd.vn/Products/Images/2443/73442/bhx/nuoc-ngot-pepsi-lon-320ml-202401080915188861.jpg" },
+      { id: 3, name: "7Up", price: 10000, image: "https://cdn.tgdd.vn/Products/Images/2443/73449/bhx/nuoc-ngot-7-up-lon-320ml-202308181117155302.jpg" },
+      { id: 4, name: "Trà Xanh Không Độ", price: 9000, image: "https://cdn.tgdd.vn/Products/Images/2443/73439/bhx/tra-xanh-khong-do-chai-455ml-202308241107363359.jpg" },
+    ];
+
+    let editingId = null;
+
+    const tableBody = document.querySelector("#productTable tbody");
+    const modal = document.querySelector("#modal");
+    const modalTitle = document.querySelector("#modalTitle");
+    const nameInput = document.querySelector("#productName");
+    const priceInput = document.querySelector("#productPrice");
+    const imageInput = document.querySelector("#productImage");
+    const imgPreview = document.querySelector("#imgPreview img");
+    const previewContainer = document.querySelector("#imgPreview");
+    const btnAdd = document.querySelector("#btnAdd");
+    const btnSave = document.querySelector("#saveBtn");
+    const btnCancel = document.querySelector("#cancelBtn");
+
+    function renderTable() {
+      tableBody.innerHTML = products.map(p => `
+        <tr>
+          <td>
+            <div class="product-info">
+              <img src="${p.image}" alt="${p.name}">
+              <span>${p.name}</span>
+            </div>
+          </td>
+          <td>${p.price.toLocaleString("vi-VN")}</td>
+          <td>
+            <button class="btn btn-edit" onclick="editProduct(${p.id})">Sửa</button>
+            <button class="btn btn-delete" onclick="deleteProduct(${p.id})">Xóa</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function openModal(isEdit = false) {
+      modal.style.display = "flex";
+      modalTitle.textContent = isEdit ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm";
+      setTimeout(() => nameInput.focus(), 100);
+    }
+
+    function closeModal() {
+      modal.style.display = "none";
+      nameInput.value = "";
+      priceInput.value = "";
+      imageInput.value = "";
+      previewContainer.style.display = "none";
+      imgPreview.src = "";
+      editingId = null;
+    }
+
+    btnAdd.onclick = () => openModal(false);
+    btnCancel.onclick = closeModal;
+
+    // Xử lý preview ảnh khi chọn file
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imgPreview.src = e.target.result;
+          previewContainer.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewContainer.style.display = "none";
+        imgPreview.src = "";
+      }
+    });
+
+    btnSave.onclick = () => {
+      const name = nameInput.value.trim();
+      const price = Number(priceInput.value);
+      const image = imgPreview.src;
+
+      if (!name || price <= 0 || !image) {
+        alert("Vui lòng nhập đầy đủ tên, giá và ảnh hợp lệ!");
+        return;
+      }
+
+      if (editingId) {
+        const p = products.find(p => p.id === editingId);
+        p.name = name;
+        p.price = price;
+        p.image = image;
+      } else {
+        const id = Math.max(0, ...products.map(p => p.id)) + 1;
+        products.push({ id, name, price, image });
+      }
+
+      renderTable();
+      closeModal();
+    };
+
+    window.editProduct = (id) => {
+      const p = products.find(p => p.id === id);
+      if (!p) return;
+      editingId = id;
+      nameInput.value = p.name;
+      priceInput.value = p.price;
+
+      // Chuyển ảnh thành preview
+      imgPreview.src = p.image;
+      previewContainer.style.display = "block";
+      imageInput.value = "";
+      openModal(true);
+    };
+
+    window.deleteProduct = (id) => {
+      if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+        products = products.filter(p => p.id !== id);
+        renderTable();
+      }
+    };
+
+    window.onclick = (e) => {
+      if (e.target === modal) closeModal();
+    };
+
+    renderTable();
+  </script>
+
+</body>
+</html>

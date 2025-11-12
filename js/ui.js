@@ -48,19 +48,22 @@ export async function renderAll() {
       const isEmpty = Number(slot.quantity) === 0;
 
       return `
-        <div class="drink-box ${isEmpty ? "empty" : ""}" data-slot-id="${
-        slot.slot_id
-      }">
+        <div class="drink-box ${isEmpty ? "empty" : ""}" data-slot-id="${slot.slot_id}">
           <h3>Ô ${slot.slot_id}</h3>
           <p class="drink-name">${escapeHtml(name)}</p>
           <p class="price">Giá: ${price}</p>
           <div class="quantity">
-            
             <span class="count" aria-live="polite">${slot.quantity}</span>
-
           </div>
           ${isEmpty ? `<div class="empty-badge">⚠️ Hết hàng</div>` : ""}
           <button type="button" class="update-btn btn-update">Cập nhật</button>
+          ${
+            product
+              ? `<a href="edit_drink.html?id=${product.id}" class="gear-icon" title="Chỉnh sửa sản phẩm">
+                   <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="edit" />
+                 </a>`
+              : ""
+          }
         </div>
       `;
     })
@@ -83,7 +86,7 @@ export function setupEventDelegation() {
     return;
   }
 
-  // Delegation cho +/-
+  // Delegation cho +/- và update
   container.addEventListener("click", (e) => {
     const box = e.target.closest(".drink-box");
     if (!box) return;

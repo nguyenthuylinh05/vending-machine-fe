@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chỉnh sửa Ô nước</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f7f9fc;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #dd2476;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .img-preview {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .img-preview img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      color: white;
+      transition: 0.3s;
+    }
+
+    .btn-save { background: #d32f2f; }
+    .btn-cancel { background: #dc3545; }
+
+    .btn-save:hover { background: #218838; }
+    .btn-cancel:hover { background: #c82333; }
+  </style>
+</head>
+<body>
+
+  <h2>Chỉnh sửa Ô nước</h2>
+
+  <div class="container">
+    <label for="slotName">Tên ô (ví dụ: Ô 1)</label>
+    <input type="text" id="slotName" placeholder="Nhập tên ô">
+
+    <label for="productSelect">Chọn sản phẩm nước</label>
+    <select id="productSelect">
+      <option value="">-- Chọn sản phẩm --</option>
+    </select>
+
+    <div class="img-preview" id="imgPreview" style="display:none;">
+      <img src="" alt="preview">
+    </div>
+
+    <div class="actions">
+      <button class="btn-save" id="saveBtn">Lưu</button>
+      <button class="btn-cancel" id="cancelBtn">Hủy</button>
+    </div>
+  </div>
+
+  <script type="module">
+    const products = [
+      { id: 1, name: "Coca-Cola", image: "https://cdn.tgdd.vn/Products/Images/2443/73440/bhx/nuoc-ngot-coca-cola-lon-320ml-202312181442377582.jpg" },
+      { id: 2, name: "Pepsi", image: "https://cdn.tgdd.vn/Products/Images/2443/73442/bhx/nuoc-ngot-pepsi-lon-320ml-202401080915188861.jpg" },
+      { id: 3, name: "7Up", image: "https://cdn.tgdd.vn/Products/Images/2443/73449/bhx/nuoc-ngot-7-up-lon-320ml-202308181117155302.jpg" },
+      { id: 4, name: "Trà Xanh Không Độ", image: "https://cdn.tgdd.vn/Products/Images/2443/73439/bhx/tra-xanh-khong-do-chai-455ml-202308241107363359.jpg" },
+    ];
+
+    const params = new URLSearchParams(window.location.search);
+    const slotId = params.get("id");
+
+    const slotNameInput = document.querySelector("#slotName");
+    const productSelect = document.querySelector("#productSelect");
+    const imgPreview = document.querySelector("#imgPreview img");
+    const previewContainer = document.querySelector("#imgPreview");
+    const saveBtn = document.querySelector("#saveBtn");
+    const cancelBtn = document.querySelector("#cancelBtn");
+
+    // Populate dropdown
+    products.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.name;
+      productSelect.appendChild(opt);
+    });
+
+    // Khi chọn sản phẩm, chỉ hiển thị ảnh
+    productSelect.addEventListener("change", () => {
+      const id = Number(productSelect.value);
+      const product = products.find(p => p.id === id);
+      if (product) {
+        imgPreview.src = product.image;
+        previewContainer.style.display = "block";
+      } else {
+        imgPreview.src = "";
+        previewContainer.style.display = "none";
+      }
+    });
+
+    // Lưu thay đổi
+    saveBtn.addEventListener("click", () => {
+      const selectedId = Number(productSelect.value);
+      const selectedProduct = products.find(p => p.id === selectedId);
+      const slotName = slotNameInput.value.trim();
+
+      if (!selectedProduct) {
+        alert("Vui lòng chọn sản phẩm!");
+        return;
+      }
+      if (!slotName) {
+        alert("Vui lòng nhập tên ô!");
+        return;
+      }
+
+      // Lưu vào localStorage
+      const slotData = { 
+        slotId, 
+        slotName, 
+        product: selectedProduct 
+      };
+      localStorage.setItem(`slot_${slotId}`, JSON.stringify(slotData));
+
+      alert("Cập nhật thành công!");
+      window.location.href = "drink.html";
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      window.location.href = "drink.html";
+    });
+
+    // Load dữ liệu cũ nếu có
+    const saved = localStorage.getItem(`slot_${slotId}`);
+    if (saved) {
+      const slotData = JSON.parse(saved);
+      slotNameInput.value = slotData.slotName;
+      if (slotData.product) {
+        productSelect.value = slotData.product.id;
+        imgPreview.src = slotData.product.image;
+        previewContainer.style.display = "block";
+      }
+    }
+  </script>
+
+</body>
+</html>

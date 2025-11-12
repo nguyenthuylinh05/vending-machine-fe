@@ -1,5 +1,5 @@
 // js/api.js
-const API_BASE = "http://localhost:5000";
+const API_BASE = "http://172.20.10.2:5000";
 export const API_PRODUCT_BASE = `${API_BASE}/api/products/`;
 export const API_SLOTS = `${API_BASE}/api/slots`;
 
