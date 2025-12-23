@@ -115,6 +115,10 @@
       const API_URL = "https://vending-machine-api-1-5.onrender.com/api/money/";
       const tbody = document.getElementById("tableBody");
 
+      const PAGE_SIZE = 10;
+      let currentPage = 1;
+      let fullList = [];
+
       // Định dạng thời gian dễ đọc
       function formatDate(isoString) {
         const date = new Date(isoString);
@@ -129,30 +133,60 @@
         });
       }
 
-      async function loadMoneyData() {
-        try {
-          const res = await fetch(API_URL);
-          const json = await res.json();
+      function ensurePagerUI() {
+        if (document.getElementById("pager")) return;
 
-          if (json.status !== "OK" || !json.metadata?.list) {
-            throw new Error("Không có dữ liệu hợp lệ từ server");
+        const pager = document.createElement("div");
+        pager.id = "pager";
+        pager.style.display = "flex";
+        pager.style.gap = "10px";
+        pager.style.alignItems = "center";
+        pager.style.justifyContent = "center";
+        pager.style.marginTop = "16px";
+
+        pager.innerHTML = `
+      <button id="btnPrev" style="padding:10px 14px;border:none;border-radius:8px;cursor:pointer;">← Trước</button>
+      <span id="pageInfo" style="font-weight:600;"></span>
+      <button id="btnNext" style="padding:10px 14px;border:none;border-radius:8px;cursor:pointer;">Sau →</button>
+    `;
+
+        document.querySelector("main").appendChild(pager);
+
+        document.getElementById("btnPrev").addEventListener("click", () => {
+          if (currentPage > 1) {
+            currentPage--;
+            renderPage();
           }
+        });
 
-          const list = json.metadata.list;
-
-          // Nếu không có bản ghi nào
-          if (!list.length) {
-            tbody.innerHTML = `
-          <tr>
-            <td colspan="4" style="text-align:center; color: gray;">
-              Chưa có dữ liệu tiền được nhận diện
-            </td>
-          </tr>`;
-            return;
+        document.getElementById("btnNext").addEventListener("click", () => {
+          const totalPages = Math.max(
+            1,
+            Math.ceil(fullList.length / PAGE_SIZE)
+          );
+          if (currentPage < totalPages) {
+            currentPage++;
+            renderPage();
           }
+        });
+      }
 
-          // Render danh sách
-          tbody.innerHTML = list
+      function renderPage() {
+        const totalPages = Math.max(1, Math.ceil(fullList.length / PAGE_SIZE));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const pageItems = fullList.slice(start, start + PAGE_SIZE);
+
+        if (!pageItems.length) {
+          tbody.innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align:center; color: gray;">
+            Chưa có dữ liệu tiền được nhận diện
+          </td>
+        </tr>`;
+        } else {
+          tbody.innerHTML = pageItems
             .map(
               (item) => `
           <tr>
@@ -167,6 +201,42 @@
           </tr>`
             )
             .join("");
+        }
+
+        // cập nhật UI phân trang
+        ensurePagerUI();
+        const pageInfo = document.getElementById("pageInfo");
+        const btnPrev = document.getElementById("btnPrev");
+        const btnNext = document.getElementById("btnNext");
+
+        pageInfo.textContent = `Trang ${currentPage}/${totalPages} (Tổng: ${fullList.length})`;
+        btnPrev.disabled = currentPage <= 1;
+        btnNext.disabled = currentPage >= totalPages;
+
+        btnPrev.style.opacity = btnPrev.disabled ? "0.5" : "1";
+        btnNext.style.opacity = btnNext.disabled ? "0.5" : "1";
+      }
+
+      async function loadMoneyData() {
+        try {
+          const res = await fetch(API_URL);
+          const json = await res.json();
+
+          if (json.status !== "OK" || !json.metadata?.list) {
+            throw new Error("Không có dữ liệu hợp lệ từ server");
+          }
+
+          // danh sách mới
+          fullList = json.metadata.list || [];
+
+          // nếu đang ở trang > tổng trang mới thì tự kéo về
+          const totalPages = Math.max(
+            1,
+            Math.ceil(fullList.length / PAGE_SIZE)
+          );
+          if (currentPage > totalPages) currentPage = totalPages;
+
+          renderPage();
         } catch (err) {
           console.error("Lỗi tải dữ liệu:", err);
           tbody.innerHTML = `
@@ -178,10 +248,9 @@
         }
       }
 
-      // Gọi khi trang load
       document.addEventListener("DOMContentLoaded", () => {
-        loadMoneyData(); // Lần đầu tải
-        setInterval(loadMoneyData, 3000); // Cập nhật tự động mỗi 3 giây
+        loadMoneyData();
+        setInterval(loadMoneyData, 3000);
       });
     </script>
   </body>
