@@ -1,5 +1,5 @@
 // js/transactions.js
-const API_BASE = "http://localhost:5000";
+const API_BASE = "https://vending-machine-api-1-5.onrender.com";
 const API_TRANSACTIONS = `${API_BASE}/api/transactions/`;
 const API_PRODUCT_BASE = `${API_BASE}/api/products/`;
 

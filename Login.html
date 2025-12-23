@@ -111,9 +111,9 @@
     <div class="register-link">
       Chưa có tài khoản? <a href="Register.html">Đăng kí</a>
   </div>
-    <div class="extra-links">
+    <!-- <div class="extra-links">
       <p><a href="ForgotPassword.html">Quên mật khẩu?</a></p>
-    </div> 
+    </div>  -->
 </body>
   <script>
     const form = document.querySelector(".login-box form");
@@ -130,7 +130,7 @@
       }
 
       try {
-        const res = await fetch(`http://localhost:5000/api/auth/login`, {
+        const res = await fetch(`https://vending-machine-api-1-5.onrender.com/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password }),

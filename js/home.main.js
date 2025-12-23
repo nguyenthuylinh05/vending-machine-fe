@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://vending-machine-api-1-5.onrender.com/api";
 
 function vnd(n) {
   const num = Number(n) || 0;
@@ -22,21 +22,24 @@ async function getData(endpoint) {
 
 async function loadStats() {
   try {
-    // Gọi song song hai API
-    const [tx, slots] = await Promise.all([
+    // Gọi song song 3 API
+    const [tx, slots, depositData] = await Promise.all([
       getData("/transactions"),
       getData("/slots"),
+      fetch(
+        "https://vending-machine-api-1-5.onrender.com/api/transactions/deposit"
+      ).then((res) => res.json()),
     ]);
 
     const transactions = tx.transactions ?? [];
     const slotList = slots.slots ?? [];
 
     const totalTransactions = transactions.length;
-    const totalRevenue = transactions.reduce(
-      (sum, t) => sum + (Number(t.total_price) || 0),
-      0
-    );
 
+    // Lấy currentMoney từ API deposit
+    const currentMoney = depositData?.metadata?.currentMoney ?? 0;
+
+    // Tìm slot có số lượng thấp nhất
     let lowestSlot = "N/A";
     if (slotList.length) {
       const minSlot = slotList.reduce((a, b) =>
@@ -46,13 +49,12 @@ async function loadStats() {
     }
 
     // Cập nhật DOM
-    document.getElementById("totalRevenue").textContent = vnd(totalRevenue);
+    document.getElementById("totalRevenue").textContent = vnd(currentMoney);
     document.getElementById("totalTransactions").textContent =
       totalTransactions;
     document.getElementById("lowestSlot").textContent = lowestSlot;
   } catch (err) {
     console.error(err);
-    // Không hiện alert liên tục
     console.warn("⚠️ Lỗi khi tải thống kê:", err.message);
   }
 }
